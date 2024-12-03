@@ -12,6 +12,7 @@ struct SwiftfulThinkingAppApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+//            WalkthroughView()
         }
     }
 }
