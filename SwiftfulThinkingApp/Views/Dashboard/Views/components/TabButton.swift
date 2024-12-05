@@ -16,11 +16,9 @@ struct TabButton: View {
     
     var body: some View {
         VStack(spacing: 4) {
-            // Tab icon
             Image(systemName: image)
                 .font(.system(size: selectedTab == index ? 26 : 24))
                 .foregroundColor(selectedTab == index ? AppColors.brown : .gray)
-            // Indicator (display only for the selected tab)
             ZStack {
                 if selectedTab == index {
                     Capsule()
@@ -36,11 +34,12 @@ struct TabButton: View {
                 }
              }
         }
-        .padding(.vertical, 8)
         .onTapGesture {
             withAnimation(.easeInOut) {
                 selectedTab = index
             }
         }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 14)
     }
 }

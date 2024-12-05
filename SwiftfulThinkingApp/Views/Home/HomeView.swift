@@ -11,49 +11,68 @@ struct HomeView: View {
     
     @StateObject private var viewModel = HomeViewModel()
     
-    @State var currentType: String = "Popular"
+    @State var currentType: String = "All Coffee"
+    @State private var currentPage = 0
     
-    // MARK: For Smooth Sliding Effect
     @Namespace var animation
     
     @State var headerOffsets: (CGFloat, CGFloat) = (0,0)
     
-    private let types: [String] = ["Popular", "Brown", "Songs", "Fans", "About", "Coffee", "Ice Cream"]
-    private let sampleData = Array(1...50).map { "Item \($0)" }
+    private let types: [String] = ["All Coffee", "Macchiato", "Latte", "Americano"]
+    private let sampleData = Array(1...5).map { "Item \($0)" }
     
     @State private var height: CGFloat = 0
     
+    // MARK: Body
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             PinnedHeader()
-//            ScrollViewReader { proxy in
                 LazyVStack(pinnedViews: [.sectionHeaders]) {
                     Section {
-                        ForEach(types, id: \.self) { type in
-                            if currentType == type {
-                                VStack(alignment: .leading) {
-                                    Text("\(type) Content")
-                                        .font(.headline)
-                                    ForEach(sampleData, id: \.self) { item in
-                                        Text("Item \(item)")
+                        
+//                        ForEach(types, id: \.self) { type in
+//                            if currentType == type {
+//                                GridView()
+//                                    .padding(.top, 20)
+//                                    .padding(.bottom, 70)
+//                                    .padding(.horizontal, 24)
+//                            }
+//                        }
+                        
+                        Group {
+                            ForEach(types, id: \.self) { type in
+                                if (currentType == type) {
+                                    VStack {
+                                        Text(type)
+                                            .font(.largeTitle)
                                             .padding()
-                                            .frame(maxWidth: .infinity)
-                                            .cornerRadius(10)
+                                        GridView()
+                                            .padding(.top, 20)
+                                            .padding(.bottom, 70)
+                                            .padding(.horizontal, 24)
                                     }
                                 }
-                                .padding()
                             }
                         }
                         
+//                        TabView(selection: $currentType) {
+//                            ForEach(types, id: \.self) { item in
+//                                GridView()
+//                                    .padding(.top, 70)
+//                                    .padding(.bottom, 70)
+//                                    .padding(.horizontal, 24)
+//                            }
+//                        }
+//                        .tabViewStyle(.page(indexDisplayMode: .never))
+//                        .frame(height: height)
                     } header: {
-                        PinnedTabs(/*proxy: proxy*/)
+                        PinnedTabs()
                             .background(AppColors.lightGray)
                             .offset(y: headerOffsets.1 > 0 ? 0 : -headerOffsets.1 / 8)
                             .modifier(OffsetModifier(offset: $headerOffsets.0, returnFromStart: false))
                             .modifier(OffsetModifier(offset: $headerOffsets.1))
                     }
                 }
-//            }
         }
         .overlay(content: {
             Rectangle()
@@ -68,32 +87,103 @@ struct HomeView: View {
         .background(AppColors.lightGray)
     }
     
-    // MARK: Random List
+    // MARK: Grid View
     @ViewBuilder
     func GridView() -> some View {
-        LazyVGrid(columns: [GridItem(.flexible(), spacing: 1), GridItem(.flexible(), spacing: 1)], spacing: 1) {
-            ForEach(0...100, id: \.self) { index in
-                Text("HELLO")
-                    .padding()
+        
+        let grid = GridItem(.flexible(), spacing: 14)
+        
+        LazyVGrid(columns: [grid, grid], spacing: 14) {
+            ForEach(sampleData, id: \.self) { item in
+                ItemCell()
+                    .padding(.all, 14)
+                    .background(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 18))
+                    .onTapGesture {
+                        print("TAPPED PUTA")
+                    }
             }
         }
         .background(
-            GeometryReader { geo in
+            GeometryReader{ geo in
                 Color.clear
                     .preference(
                         key: HeightPreferenceKey.self,
                         value: geo.size.height
                     )
             }
-            .onPreferenceChange(HeightPreferenceKey.self) { height in
+            .onPreferenceChange(HeightPreferenceKey.self, perform: { height in
                 self.height = height
             }
+          )
         )
+    }
+    
+    // MARK: Item Cell
+    @ViewBuilder
+    func ItemCell() -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ZStack(alignment: .topTrailing) {
+                Image("coffee_bg")
+                    .resizable()
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .frame(height: 140)
+                    .frame(maxWidth: .infinity)
+                HStack(spacing: 8) {
+                    Image(systemName:"star.fill")
+                        .foregroundColor(.yellow)
+                        .frame(width: 16, height: 16)
+                    Text("4.8")
+                        .font(.system(size: 14))
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.white)
+                }
+                .padding(.top, 8)
+                .padding(.trailing, 10)
+            }
+            Spacer()
+            Text("Cafe Mocha")
+                .font(.system(size: 16))
+                .fontWeight(.semibold)
+                .foregroundStyle(.black)
+            Spacer(minLength: 4)
+            Text("Deep Foam")
+                .font(.system(size: 14))
+                .fontWeight(.regular)
+                .foregroundStyle(.gray)
+            Spacer(minLength: 20)
+            HStack(alignment: .center) {
+                Text("$4.56")
+                    .font(.system(size: 16))
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.black)
+                Spacer()
+                Button(
+                    action: {
+                        
+                    }
+                ) {
+                    Image(systemName: "plus")
+                        .resizable()
+                        .frame(width: 16, height: 16)
+                        .foregroundStyle(.white)
+                }
+                .padding()
+                .frame(
+                    width: 40,
+                    height: 40,
+                    alignment: .center
+                )
+                .background(AppColors.brown)
+                .cornerRadius(12)
+                .padding(.leading, 12)
+            }
+        }
     }
     
     // MARK: Pinned Tabs
     @ViewBuilder
-    private func PinnedTabs(/*proxy: ScrollViewProxy*/) -> some View {
+    private func PinnedTabs() -> some View {
         
         ScrollViewReader { proxy in
             ScrollView(.horizontal, showsIndicators: false) {
@@ -124,13 +214,14 @@ struct HomeView: View {
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 10)
+                .padding(.bottom, 4)
             }
         }
     }
     
-    // MARK: Location
+    // MARK: Pinned Location
     @ViewBuilder
-    private func Location() -> some View {
+    private func PinnedLocation() -> some View {
         VStack(
             alignment: .leading,
             spacing: 6.0
@@ -151,9 +242,9 @@ struct HomeView: View {
         }
     }
     
-    // MARK: Search Field
+    // MARK: Pinned Search Field w/ Settings
     @ViewBuilder
-    private func SearchFieldWithSettings() -> some View {
+    private func PinnedSearchFieldWithSettings() -> some View {
         HStack(
             alignment: .center
         ) {
@@ -220,8 +311,8 @@ struct HomeView: View {
                     alignment: .leading,
                     spacing: 30.0
                 ) {
-                    Location()
-                    SearchFieldWithSettings()
+                    PinnedLocation()
+                    PinnedSearchFieldWithSettings()
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 20)
@@ -236,6 +327,7 @@ struct HomeView: View {
         }
     }
     
+    // MARK: Banner
     @ViewBuilder
     private func BannerView() -> some View {
         Image("banner")
@@ -249,10 +341,9 @@ struct HomeView: View {
     HomeView()
 }
 
-
 struct HeightPreferenceKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
-    
+    static let defaultValue: CGFloat = 0
+
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
         value = nextValue()
     }
