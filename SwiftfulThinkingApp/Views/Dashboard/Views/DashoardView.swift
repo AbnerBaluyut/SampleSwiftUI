@@ -11,135 +11,78 @@ struct DashoardView: View {
     
     @StateObject private var viewModel = DashboardViewModel()
     
+    @Namespace var animation: Namespace.ID
+    
     var body: some View {
-        ScrollView(.vertical, showsIndicators: false) {
-            HeaderView()
-            CardView()
-            VStack {
-                Text("Dashboard App Bar")
-                    .font(.largeTitle)
-                    .bold()
-                    .foregroundColor(.black)
-                Text("Collapsing App Bar")
-                    .font(.subheadline)
-                    .foregroundColor(.black)
-                    .padding(.top, 10)
-                Spacer()
-            }
-            .padding(.top, 20)
+        ZStack(alignment: .bottom) {
+            MainContent()
+            NavigationTabBar()
         }
-        .ignoresSafeArea(.all, edges: .top)
-        .frame(maxHeight: .infinity, alignment: .top)
-        .background(Color.white)
         .navigationBarBackButtonHidden()
+        .ignoresSafeArea(.container, edges: .bottom)
+        
     }
     
-    
+    // MARK: Content based on the selected tab
     @ViewBuilder
-    func HeaderView() -> some View {
-        GeometryReader { geo in
-            let minY = geo.frame(in: .global).minY
-            let isScrolling = minY > 0
-            ZStack(alignment: .bottom) {
-                VStack(
-                    alignment: .leading,
-                    spacing: 30.0
-                ) {
-                    VStack(
-                        alignment: .leading,
-                        spacing: 6.0
-                    ) {
-                        Text("Location")
-                            .font(.system(size: 16))
-                            .fontWeight(.regular)
-                            .foregroundColor(.gray)
-                        HStack {
-                            Text("Angeles, Pampanga")
-                                .font(.system(size: 18))
-                                .fontWeight(.regular)
-                                .foregroundColor(AppColors.lightGray)
-                            Image(systemName: "chevron.down")
-                                .foregroundColor(.white)
-                                .font(.system(size: 18))
-                        }
-                    }
-                    .padding(.horizontal, 16)
-                    HStack(
-                        alignment: .center
-                    ) {
-                        HStack {
-                            Image("search")
-                                .resizable()
-                                .frame(width: 20, height: 20)
-                            TextField(
-                                "Search Coffee",
-                                text: $viewModel.searchText,
-                                prompt: Text("Search Coffee")
-                                    .font(.system(size: 16))
-                                    .fontWeight(.regular)
-                                    .foregroundStyle(.gray)
-                            )
-                            .font(.system(size: 16))
-                            .fontWeight(.regular)
-                            .foregroundStyle(.white)
-                        }
-                        .padding()
-                        .background(
-                            LinearGradient(
-                                gradient: Gradient(
-                                    colors:[
-                                        Color(hex: "2A2A2A").opacity(0.1),
-                                        Color(hex: "2A2A2A").opacity(0.8)
-                                    ]
-                                ),
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .cornerRadius(16)
-                        Button(
-                            action: {
-                                
-                            }
-                        ) {
-                            Image("settings")
-                                .resizable()
-                                .frame(width: 28, height: 28)
-                        }
-                        .padding()
-                        .frame(
-                            width: 54,
-                            height: 54,
-                            alignment: .center
-                        )
-                        .background(AppColors.brown)
-                        .cornerRadius(12)
-                        .padding(.leading, 12)
-                    }
-                    .padding(.horizontal, 16)
-                }
-                .padding()
+    private func MainContent() -> some View {
+        Group {
+            switch viewModel.selectedTab {
+                case 0: HomeView()
+                case 1: Text("Search Screen").font(.largeTitle)
+                case 2: Text("Profile Screen").font(.largeTitle)
+                default: Text("More Screen").font(.largeTitle)
             }
-            .frame(height: isScrolling ? 300 + minY : 300)
-            .background(.black)
-            .offset(y: isScrolling ? -minY : 0)
         }
-        .frame(height: 250)
-        .ignoresSafeArea()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
+    // MARK: Tab Bar
     @ViewBuilder
-    func CardView() -> some View {
-        ZStack {
-            AppColors.brown.cornerRadius(10)
-            Text("Buy one get one FREE")
-                .font(.headline)
-                .bold()
-                .foregroundColor(.white)
-                .padding()
+    private func NavigationTabBar() -> some View {
+        HStack(alignment: .center) {
+            Spacer()
+            TabButton(
+                index: 0,
+                image: "house.fill",
+                title: "Home",
+                animation: animation,
+                selectedTab: $viewModel.selectedTab
+            )
+            Spacer()
+            TabButton(
+                index: 1,
+                image: "heart",
+                title: "Favorites",
+                animation: animation,
+                selectedTab: $viewModel.selectedTab
+            )
+            Spacer()
+            TabButton(
+                index: 2,
+                image: "bag",
+                title: "Cart",
+                animation: animation,
+                selectedTab: $viewModel.selectedTab
+            )
+            Spacer()
+            TabButton(
+                index: 3,
+                image: "bell",
+                title: "Alerts",
+                animation: animation,
+                selectedTab: $viewModel.selectedTab
+            )
+            Spacer()
         }
-        .frame(height: 100)
-        .padding(.horizontal, 16)
+        .frame(height: 60)
+        .padding(.vertical, 10)
+        .background(
+            Color.white
+                .clipShape(RoundedCorner(corners: [.topLeft, .topRight], radius: 30))
+                .shadow(color: .black.opacity(0.1), radius: 5.0, x: 0)
+        )
+        .frame(maxWidth: .infinity)
     }
 }
 

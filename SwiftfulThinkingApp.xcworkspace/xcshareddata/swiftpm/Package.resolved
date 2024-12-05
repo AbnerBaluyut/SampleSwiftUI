@@ -1,0 +1,15 @@
+{
+  "originHash" : "1aa14f1552bd43bf0aa8e2219d00128b0bad44b2db7aa38647d319c1337a393d",
+  "pins" : [
+    {
+      "identity" : "swiftuimaterialtabs",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SwiftKickMobile/SwiftUIMaterialTabs",
+      "state" : {
+        "revision" : "782f083f96ed30f4dacfaff8575d5c2005017cd6",
+        "version" : "2.0.6"
+      }
+    }
+  ],
+  "version" : 3
+}

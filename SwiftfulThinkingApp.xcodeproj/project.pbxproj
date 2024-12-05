@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		135EE6986346DABD7EFC2F13 /* Pods_SwiftfulThinkingApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C580C9A4C3D3B38B3E983E7 /* Pods_SwiftfulThinkingApp.framework */; };
+		D71174AA2D0174160093BA7C /* SwiftUIMaterialTabs in Frameworks */ = {isa = PBXBuildFile; productRef = D71174A92D0174160093BA7C /* SwiftUIMaterialTabs */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,6 +32,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				135EE6986346DABD7EFC2F13 /* Pods_SwiftfulThinkingApp.framework in Frameworks */,
+				D71174AA2D0174160093BA7C /* SwiftUIMaterialTabs in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -120,6 +122,9 @@
 			);
 			mainGroup = D7802B352CFD5E7F0044A9AC;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				D71174A82D0174160093BA7C /* XCRemoteSwiftPackageReference "SwiftUIMaterialTabs" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = D7802B3F2CFD5E7F0044A9AC /* Products */;
 			projectDirPath = "";
@@ -381,6 +386,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		D71174A82D0174160093BA7C /* XCRemoteSwiftPackageReference "SwiftUIMaterialTabs" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SwiftKickMobile/SwiftUIMaterialTabs";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.6;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		D71174A92D0174160093BA7C /* SwiftUIMaterialTabs */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D71174A82D0174160093BA7C /* XCRemoteSwiftPackageReference "SwiftUIMaterialTabs" */;
+			productName = SwiftUIMaterialTabs;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = D7802B362CFD5E7F0044A9AC /* Project object */;
 }

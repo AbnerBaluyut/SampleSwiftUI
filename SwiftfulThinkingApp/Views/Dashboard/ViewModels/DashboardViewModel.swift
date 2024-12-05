@@ -11,7 +11,8 @@ class DashboardViewModel: ObservableObject {
     
     private var appStorage = AppStorageManager.shared
     
-    @Published var searchText: String = "" 
+    @Published var searchText: String = ""
+    @Published var selectedTab: Int = 0
     
     func clearAppStorage() {
         appStorage.hasSeenWalkthrough = false
