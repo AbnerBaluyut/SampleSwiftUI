@@ -42,18 +42,14 @@ struct HomeView: View {
                         Group {
                             ForEach(types, id: \.self) { type in
                                 if (currentType == type) {
-                                    VStack {
-                                        Text(type)
-                                            .font(.largeTitle)
-                                            .padding()
-                                        GridView()
-                                            .padding(.top, 20)
-                                            .padding(.bottom, 70)
-                                            .padding(.horizontal, 24)
-                                    }
+                                    GridView()
+                                        .padding(.top, 20)
+                                        .padding(.bottom, 70)
+                                        .padding(.horizontal, 24)
                                 }
                             }
                         }
+                        
                         
 //                        TabView(selection: $currentType) {
 //                            ForEach(types, id: \.self) { item in
@@ -63,8 +59,9 @@ struct HomeView: View {
 //                                    .padding(.horizontal, 24)
 //                            }
 //                        }
-//                        .tabViewStyle(.page(indexDisplayMode: .never))
+//                        .tabViewStyle(.page(indexDisplayMode: .automatic))
 //                        .frame(height: height)
+//                        .padding(.bottom, 70)
                     } header: {
                         PinnedTabs()
                             .background(AppColors.lightGray)
