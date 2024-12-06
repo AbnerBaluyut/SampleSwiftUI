@@ -76,11 +76,6 @@ struct HomeView: View {
         .scrollTargetBehavior(.viewAligned)
         .scrollPosition(id: $activeTypeIndex, anchor: .center)
         .scrollIndicators(.never)
-        .onChange(of: activeTypeIndex ?? 0) { oldValue, newValue in
-            withAnimation {
-                activeTypeIndex = newValue
-            }
-        }
     }
     
     // MARK: Grid View
@@ -199,6 +194,11 @@ struct HomeView: View {
                 .padding(.horizontal, 24)
                 .padding(.top, headerOffsets.0 > 0 ? 0 : 4)
                 .padding(.bottom, 4)
+            }
+            .onChange(of: activeTypeIndex) { _, newValue in
+                withAnimation(.easeInOut) {
+                    proxy.scrollTo(newValue, anchor: .center)
+                }
             }
             .animation(.easeInOut, value: activeTypeIndex)
         }
