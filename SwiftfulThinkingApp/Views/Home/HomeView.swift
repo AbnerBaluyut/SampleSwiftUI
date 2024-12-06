@@ -23,27 +23,28 @@ struct HomeView: View {
     // MARK: Body
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
-            PinnedHeader()
             LazyVStack(pinnedViews: [.sectionHeaders]) {
-                ScrollViewReader { proxy in
-                    Section {
-                        PaginatedView(proxy: proxy)
-                    } header: {
-                        PinnedTabs(proxy: proxy)
-                            .background(AppColors.lightGray)
-                            .offset(y: headerOffsets.1 > 0 ? 0 : -headerOffsets.1 / 8)
-                            .modifier(OffsetModifier(offset: $headerOffsets.0, returnFromStart: false))
-                            .modifier(OffsetModifier(offset: $headerOffsets.1))
-                    }
+                PinnedHeader()
+                Section {
+                    PaginatedView()
+                } header: {
+                    PinnedTabs()
+                        .background(AppColors.lightGray)
+                        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 5)
+                        .offset(y: headerOffsets.1 > 0 ? 0 : -headerOffsets.1 / 6)
+                        .modifier(OffsetModifier(offset: $headerOffsets.0, returnFromStart: false))
+                        .modifier(OffsetModifier(offset: $headerOffsets.1))
+                        .ignoresSafeArea(.all, edges: .top)
                 }
             }
         }
         .overlay(content: {
             Rectangle()
                 .fill(AppColors.lightGray)
-                .frame(height: 50)
+                .frame(height: 63)
                 .frame(maxHeight: .infinity, alignment: .top)
-                .opacity(headerOffsets.0 < 8 ? 1 : 0)
+                .opacity(headerOffsets.0 < 6 ? 1 : 0)
+                .ignoresSafeArea(.all, edges: .top)
         })
         .coordinateSpace(name: "SCROLL")
         .frame(maxHeight: .infinity, alignment: .top)
@@ -53,7 +54,7 @@ struct HomeView: View {
     
     // MARK: Paginated View
     @ViewBuilder
-    func PaginatedView(proxy: ScrollViewProxy) -> some View {
+    func PaginatedView() -> some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack {
                 Group {
@@ -70,15 +71,14 @@ struct HomeView: View {
                 }
                 .containerRelativeFrame(.horizontal, count: 1, spacing: 0)
             }
-            .scrollTargetLayout(isEnabled: true)
+            .scrollTargetLayout()
         }
-        .scrollTargetBehavior(.paging)
-        .scrollPosition(id: $activeTypeIndex)
+        .scrollTargetBehavior(.viewAligned)
+        .scrollPosition(id: $activeTypeIndex, anchor: .center)
         .scrollIndicators(.never)
         .onChange(of: activeTypeIndex ?? 0) { oldValue, newValue in
-            withAnimation(.easeInOut) {
+            withAnimation {
                 activeTypeIndex = newValue
-                proxy.scrollTo(newValue, anchor: .center)
             }
         }
     }
@@ -166,39 +166,42 @@ struct HomeView: View {
     
     // MARK: Pinned Tabs
     @ViewBuilder
-    private func PinnedTabs(proxy: ScrollViewProxy) -> some View {
+    private func PinnedTabs() -> some View {
         
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 14) {
-                ForEach(types.indices, id: \.self) { index in
-                    ZStack {
-                        if activeTypeIndex == index {
-                            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .fill(AppColors.brown)
-                                .matchedGeometryEffect(id: "TAB", in: animation)
-                        } else {
-                            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .fill(.clear)
+        ScrollViewReader { proxy in
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 14) {
+                    ForEach(types.indices, id: \.self) { index in
+                        ZStack {
+                            if activeTypeIndex == index {
+                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                    .fill(AppColors.brown)
+                                    .matchedGeometryEffect(id: "TAB", in: animation)
+                            } else {
+                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                    .fill(.clear)
+                            }
+                            Text(types[index])
+                                .padding(.horizontal, 18)
+                                .padding(.vertical, 14)
+                                .fontWeight(activeTypeIndex == index ? .semibold : .regular)
+                                .foregroundStyle(activeTypeIndex == index ? .white : .black)
                         }
-                        Text(types[index])
-                            .padding(.horizontal, 18)
-                            .padding(.vertical, 14)
-                            .fontWeight(activeTypeIndex == index ? .semibold : .regular)
-                            .foregroundStyle(activeTypeIndex == index ? .white : .black)
-                    }
-                    .onTapGesture {
-                        withAnimation(.easeInOut) {
-                            activeTypeIndex = index
-                            proxy.scrollTo(activeTypeIndex, anchor: .center)
+                        .onTapGesture {
+                            withAnimation(.easeInOut) {
+                                activeTypeIndex = index
+                                proxy.scrollTo(activeTypeIndex, anchor: .center)
+                            }
                         }
+                        .id(index)
                     }
                 }
+                .padding(.horizontal, 24)
+                .padding(.top, headerOffsets.0 > 0 ? 0 : 4)
+                .padding(.bottom, 4)
             }
-            .padding(.horizontal, 24)
-            .padding(.top, 10)
-            .padding(.bottom, 4)
+            .animation(.easeInOut, value: activeTypeIndex)
         }
-        .animation(.easeInOut, value: activeTypeIndex)
     }
     
     // MARK: Pinned Location
@@ -285,7 +288,7 @@ struct HomeView: View {
     // MARK: Pinned Header
     @ViewBuilder
     private func PinnedHeader() -> some View {
-        VStack {
+        VStack(spacing: 0) {
             GeometryReader { geo in
                 let minY = geo.frame(in: .global).minY
                 let isScrolling = minY > 0
@@ -297,15 +300,20 @@ struct HomeView: View {
                     PinnedSearchFieldWithSettings()
                 }
                 .padding(.horizontal, 24)
-                .padding(.bottom, 20)
-                .frame(height: isScrolling ? 300 + minY : 300)
+                .padding(.top, 30)
+                .frame(height: isScrolling ? 250 + minY : 250)
                 .background(.black)
                 .offset(y: isScrolling ? -minY : 0)
+                .ignoresSafeArea(.all, edges: .top)
             }
-            .frame(height: 400)
-            .padding(.bottom, -180)
-            .ignoresSafeArea()
-            BannerView()
+            .background(Color.yellow)
+            .frame(height: 220)
+            .ignoresSafeArea(.all, edges: .top)
+            ZStack(alignment: .top) {
+                Color.black.frame(height: 50)
+                BannerView()
+                    .padding(.top, 5)
+            }
         }
     }
     
