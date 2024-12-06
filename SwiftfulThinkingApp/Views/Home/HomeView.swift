@@ -11,65 +11,32 @@ struct HomeView: View {
     
     @StateObject private var viewModel = HomeViewModel()
     
-    @State var currentType: String = "All Coffee"
-    @State private var currentPage = 0
     
-    @Namespace var animation
+    @Namespace private var animation
     
-    @State var headerOffsets: (CGFloat, CGFloat) = (0,0)
+    @State private var headerOffsets: (CGFloat, CGFloat) = (0,0)
+    @State private var activeTypeIndex: Int? = 0
     
     private let types: [String] = ["All Coffee", "Macchiato", "Latte", "Americano"]
     private let sampleData = Array(1...5).map { "Item \($0)" }
-    
-    @State private var height: CGFloat = 0
     
     // MARK: Body
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             PinnedHeader()
-                LazyVStack(pinnedViews: [.sectionHeaders]) {
+            LazyVStack(pinnedViews: [.sectionHeaders]) {
+                ScrollViewReader { proxy in
                     Section {
-                        
-//                        ForEach(types, id: \.self) { type in
-//                            if currentType == type {
-//                                GridView()
-//                                    .padding(.top, 20)
-//                                    .padding(.bottom, 70)
-//                                    .padding(.horizontal, 24)
-//                            }
-//                        }
-                        
-                        Group {
-                            ForEach(types, id: \.self) { type in
-                                if (currentType == type) {
-                                    GridView()
-                                        .padding(.top, 20)
-                                        .padding(.bottom, 70)
-                                        .padding(.horizontal, 24)
-                                }
-                            }
-                        }
-                        
-                        
-//                        TabView(selection: $currentType) {
-//                            ForEach(types, id: \.self) { item in
-//                                GridView()
-//                                    .padding(.top, 70)
-//                                    .padding(.bottom, 70)
-//                                    .padding(.horizontal, 24)
-//                            }
-//                        }
-//                        .tabViewStyle(.page(indexDisplayMode: .automatic))
-//                        .frame(height: height)
-//                        .padding(.bottom, 70)
+                        PaginatedView(proxy: proxy)
                     } header: {
-                        PinnedTabs()
+                        PinnedTabs(proxy: proxy)
                             .background(AppColors.lightGray)
                             .offset(y: headerOffsets.1 > 0 ? 0 : -headerOffsets.1 / 8)
                             .modifier(OffsetModifier(offset: $headerOffsets.0, returnFromStart: false))
                             .modifier(OffsetModifier(offset: $headerOffsets.1))
                     }
                 }
+            }
         }
         .overlay(content: {
             Rectangle()
@@ -82,6 +49,38 @@ struct HomeView: View {
         .frame(maxHeight: .infinity, alignment: .top)
         .ignoresSafeArea(.container, edges: .vertical)
         .background(AppColors.lightGray)
+    }
+    
+    // MARK: Paginated View
+    @ViewBuilder
+    func PaginatedView(proxy: ScrollViewProxy) -> some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack {
+                Group {
+                    ForEach(types.indices, id: \.self) { index in
+                        GridView()
+                            .padding(.top, 20)
+                            .padding(.bottom, 70)
+                            .padding(.horizontal, 24)
+                            .transaction({ transaction in
+                                transaction.animation = nil
+                            })
+                            .id(index)
+                    }
+                }
+                .containerRelativeFrame(.horizontal, count: 1, spacing: 0)
+            }
+            .scrollTargetLayout(isEnabled: true)
+        }
+        .scrollTargetBehavior(.paging)
+        .scrollPosition(id: $activeTypeIndex)
+        .scrollIndicators(.never)
+        .onChange(of: activeTypeIndex ?? 0) { oldValue, newValue in
+            withAnimation(.easeInOut) {
+                activeTypeIndex = newValue
+                proxy.scrollTo(newValue, anchor: .center)
+            }
+        }
     }
     
     // MARK: Grid View
@@ -101,19 +100,6 @@ struct HomeView: View {
                     }
             }
         }
-        .background(
-            GeometryReader{ geo in
-                Color.clear
-                    .preference(
-                        key: HeightPreferenceKey.self,
-                        value: geo.size.height
-                    )
-            }
-            .onPreferenceChange(HeightPreferenceKey.self, perform: { height in
-                self.height = height
-            }
-          )
-        )
     }
     
     // MARK: Item Cell
@@ -180,40 +166,39 @@ struct HomeView: View {
     
     // MARK: Pinned Tabs
     @ViewBuilder
-    private func PinnedTabs() -> some View {
+    private func PinnedTabs(proxy: ScrollViewProxy) -> some View {
         
-        ScrollViewReader { proxy in
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 14) {
-                    ForEach(types, id: \.self) { type in
-                        ZStack {
-                            if currentType == type {
-                                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                    .fill(AppColors.brown)
-                                    .matchedGeometryEffect(id: "TAB", in: animation)
-                            } else {
-                                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                    .fill(.clear)
-                            }
-                            Text(type)
-                                .padding(.horizontal, 18)
-                                .padding(.vertical, 14)
-                                .fontWeight(currentType == type ? .semibold : .regular)
-                                .foregroundStyle(currentType == type ? .white : .black)
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 14) {
+                ForEach(types.indices, id: \.self) { index in
+                    ZStack {
+                        if activeTypeIndex == index {
+                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                .fill(AppColors.brown)
+                                .matchedGeometryEffect(id: "TAB", in: animation)
+                        } else {
+                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                .fill(.clear)
                         }
-                        .onTapGesture {
-                            withAnimation(.easeInOut) {
-                                currentType = type
-                                proxy.scrollTo(type, anchor: .center)
-                            }
+                        Text(types[index])
+                            .padding(.horizontal, 18)
+                            .padding(.vertical, 14)
+                            .fontWeight(activeTypeIndex == index ? .semibold : .regular)
+                            .foregroundStyle(activeTypeIndex == index ? .white : .black)
+                    }
+                    .onTapGesture {
+                        withAnimation(.easeInOut) {
+                            activeTypeIndex = index
+                            proxy.scrollTo(activeTypeIndex, anchor: .center)
                         }
                     }
                 }
-                .padding(.horizontal, 24)
-                .padding(.top, 10)
-                .padding(.bottom, 4)
             }
+            .padding(.horizontal, 24)
+            .padding(.top, 10)
+            .padding(.bottom, 4)
         }
+        .animation(.easeInOut, value: activeTypeIndex)
     }
     
     // MARK: Pinned Location
@@ -336,12 +321,4 @@ struct HomeView: View {
 
 #Preview {
     HomeView()
-}
-
-struct HeightPreferenceKey: PreferenceKey {
-    static let defaultValue: CGFloat = 0
-
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
-    }
 }
