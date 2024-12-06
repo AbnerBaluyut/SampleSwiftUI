@@ -41,7 +41,7 @@ struct HomeView: View {
         .overlay(content: {
             Rectangle()
                 .fill(AppColors.lightGray)
-                .frame(height: 63)
+                .frame(height: 64)
                 .frame(maxHeight: .infinity, alignment: .top)
                 .opacity(headerOffsets.0 < 6 ? 1 : 0)
                 .ignoresSafeArea(.all, edges: .top)
@@ -192,8 +192,8 @@ struct HomeView: View {
                     }
                 }
                 .padding(.horizontal, 24)
-                .padding(.top, headerOffsets.0 > 0 ? 0 : 4)
-                .padding(.bottom, 4)
+                .padding(.top, headerOffsets.0 > 0 ? 10 : 0)
+                .padding(.bottom, 6)
             }
             .onChange(of: activeTypeIndex) { _, newValue in
                 withAnimation(.easeInOut) {
@@ -293,21 +293,23 @@ struct HomeView: View {
                 let minY = geo.frame(in: .global).minY
                 let isScrolling = minY > 0
                 VStack(
-                    alignment: .leading,
-                    spacing: 30.0
+                    alignment: .leading
                 ) {
+                    Spacer()
                     PinnedLocation()
+                    Spacer()
                     PinnedSearchFieldWithSettings()
+                    Spacer()
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 30)
-                .frame(height: isScrolling ? 250 + minY : 250)
+                .frame(height: isScrolling ? 240 + minY : 240)
                 .background(.black)
                 .offset(y: isScrolling ? -minY : 0)
                 .ignoresSafeArea(.all, edges: .top)
             }
-            .background(Color.yellow)
-            .frame(height: 220)
+            .background(.black)
+            .frame(height: 230)
             .ignoresSafeArea(.all, edges: .top)
             ZStack(alignment: .top) {
                 Color.black.frame(height: 50)
