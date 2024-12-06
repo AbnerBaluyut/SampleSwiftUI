@@ -61,7 +61,7 @@ struct HomeView: View {
                     ForEach(types.indices, id: \.self) { index in
                         GridView()
                             .padding(.top, 20)
-                            .padding(.bottom, 70)
+                            .padding(.bottom, 100)
                             .padding(.horizontal, 24)
                             .transaction({ transaction in
                                 transaction.animation = nil
